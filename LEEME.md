@@ -1,3 +1,6 @@
+AzerothCore 3.3.5 - Instalación con Docker paras raspberry pi 5
+
+
 TUTORIAL
 https://www.azerothcore.org/wiki/installation
 https://www.youtube.com/watch?v=Kw_xhyssmTw
@@ -37,7 +40,7 @@ docker run hello-world
 
 docker ps -a
 
-docker rm d48f8dbbfe93      (Replace e11cced53bca with the container ID for Image "hello-world")
+docker rm ac7f31594298      (Replace e11cced53bca with the container ID for Image "hello-world")
 
 docker ps -a
 
@@ -46,7 +49,7 @@ docker rmi hello-world
 
 ----------------------------------------------------------------------------------------------------------------------------
 
-
+MEJOR NO USARLO.
 ******[Portainer Setup] (Optional)******
 
 docker volume create portainer_data
@@ -79,7 +82,7 @@ cd /home/ubuntu/docker/azerothcore-wotlk/
 
 sudo nano /etc/nanorc
 
-(Uncomment set lineumbers AKA remove the # from the front of it)
+(Uncomment: set lineumbers AKA remove the # from the front of it)
 
 sudo nano docker-compose.yml
 
@@ -96,13 +99,13 @@ docker ps -a
 
 (Locate mysql container ID and change 06eb70e041dc  that you see below with your ID)
 
-docker exec -it 8a3ccdf7bc8e   mysql -uroot -p      (Acccount: root)  (Password: password)
+docker exec -it ce4ba4f556b7   mysql -uroot -p      (Acccount: root)  (Password: password)
 
 use acore_auth
 
 DELETE FROM realmlist WHERE id=1;
 INSERT INTO realmlist (id, name, address, localAddress, localSubnetMask, port, icon, flag, timezone, allowedSecurityLevel, gamebuild)
-VALUES ('1', 'Northrend', '10.243.222.228', '127.0.0.1','255.255.255.0','8085', '1', '0', '1', '0', '12340');
+VALUES ('1', 'Plaadi's Citadel', '10.243.222.228', '127.0.0.1','255.255.255.0','8085', '1', '0', '1', '0', '12340');
 
 exit
 
@@ -116,11 +119,34 @@ docker ps -a
 
 docker attach ac-worldserver
 
-account create test1 test
+account create nelson nelson
 
-account set addon test1 2
+account set addon nelson 2
 
 Control + P + Control + Q  ***(Do not do Control + C or you will bring the world server down!)***
+
+
+HACERSE GM:
+
+docker exec -it <mysql_container_id> mysql -uroot -p
+
+USE acore_auth;
+
+DESC account;
+
+SELECT id, username FROM account WHERE username = 'adriangm';
+
+USE acore_auth;
+
+SELECT * FROM account_access WHERE id = 67;
+
+INSERT INTO account_access (id, gmlevel, RealmID) VALUES (67, 3, -1);
+
+exit
+
+docker restart ac-authserver ac-worldserver
+
+.gm on
 
 
 --------------------------------------------------------------------------
@@ -156,37 +182,6 @@ docker compose up -d --build
 
 ------------------------------------------------------------------------------------------------------------------------------
 
-
-******(Adjusting Your Realmlist SQL Configurations)******
-
-docker ps -a
-
-docker exec -it ec9a4b862224 mysql -uroot -p       (Acccount: root)  (Password: password)
-
-use acore_auth
-
-DELETE FROM realmlist WHERE id=1;
-INSERT INTO realmlist (id, name, address, localAddress, localSubnetMask, port, icon, flag, timezone, allowedSecurityLevel, gamebuild)
-VALUES ('1', 'Northrend', '192.168.60.188', '127.0.0.1','255.255.255.0','8085', '1', '0', '1', '0', '12340');
-
-exit
-
-docker ps -a
-
-docker restart 647511e6b0e6 e771ebadb593 173a55a6946c a41133c2472c 7f0f6ed8d25b   (Should be 5 containers total! Replace their ID's with the demonstration ones)
-
-docker ps -a
-
-******(Adding an Account)******
-
-docker attach ac-worldserver
-
-account create test1 test
-
-account set addon test1 2
-
-Control + P + Control + Q  ***(Do not do Control + C or you will bring the world server down!)***
-
 -----------------------------------------------------------------------
 
 
@@ -195,7 +190,7 @@ Datos ADICIONALES
 
 modificaciones del servidor propio:
 
-en : ubuntu@raspberrypi:~/docker/azerothcore-wotlk/env/dist/etc
+cd docker/azerothcore-wotlk/env/dist/etc
 sudo nano worldserver.conf
 
 -------------------------------------------
@@ -211,10 +206,16 @@ cd docker/azerothcore-wotlk
 docker ps -a
 visualizar todos los contenedores  para restart menos portainer
 
-docker restart 647511e6b0e6 e771ebadb593 173a55a6946c a41133c2472c 7f0f6ed8d25b
+docker restart 476ea3616968 919a4a81d742 00b13884b117 03ff66ce70bb 266c05f5386f
 
 por último:
 
 docker attach ac-worldserver
+
+
+
+el pool debe estar igual que el MAXBOT
+
+docker-compose down
 
 
